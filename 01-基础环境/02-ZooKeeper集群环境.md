@@ -68,3 +68,50 @@ server.1:localhost:2181:3181:observer
 192.168.120.113	node03	3
 ```
 
+#### 2.1 ZooKeeper集群安装
+
+软件下载地址：http://archive.apache.org/dist/zookeeper/  
+
+推荐版本：3.4.9，安装地址为：/usr/local/zookeeper/zookeeper-3.4.9
+
+```
+# 我们可以只安装node01，安装完毕后分发到node02，node03
+mkdir -p /usr/local/zookeeper/
+mkdir -p /usr/local/zookeeper/zkdatas/
+tar -zxvf zookeeper-3.4.9.tar.gz -C /usr/local/zookeeper/
+cd /usr/local/zookeeper/zookeeper-3.4.9/conf/
+cp zoo_sample.cfg zoo.cfg
+
+vim  zoo.cfg
+
+# 修改数据文件存放地址
+dataDir=/usr/local/zookeeper/zkdatas/
+# 打开下列配置
+autopurge.snapRetainCount=3
+autopurge.purgeInterval=1
+# 添加下列配置
+server.1=node01:2888:3888
+server.2=node02:2888:3888
+server.3=node03:2888:3888
+
+# 添加myid配置
+vim /usr/local/zookeeper/zkdatas/myid   # 写入1即可
+
+```
+
+配置完毕后，将软件发送给node02，node03
+```
+cd /usr/local/
+scp -r zookeeper/ node02:$PWD
+scp -r zookeeper/ node03:$PWD
+
+# 发送完毕后不要忘了分别修改node02和node03的myid配置为2，3，并清空该文件夹下其他文本
+```
+
+启动并测试软件：
+```
+cd /usr/local/zookeeper/zookeeper-3.4.9/bin/
+zkServer.sh start           # 启动
+jps                         # 查看启动进程
+zkServer.sh status          # 查看集群状态，未安装三台集群时，不要使用该命令
+```
