@@ -49,7 +49,7 @@
   - ResourceManager：接收用户的计算请求任务，并负责集群的资源分配，以及计算任务的划分
   - NodeManager：负责执行主节点ResourceManager分配的任务
 
-#### 2.4 
+#### 2.4 NameNode与ResourceManager高可用架构模型
 
 ![](../images/bigdata/hadoop-05.png) 
 
