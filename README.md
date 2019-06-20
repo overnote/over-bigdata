@@ -4,9 +4,11 @@
 
 ## 附录：笔记汇总
 
-**OverNote**地址：https://github.com/overnote 
+**OverNote**地址：https://github.com/overnote   
 
-- [推荐书籍汇总](https://github.com/ruyuejun/polaris)：记录了所有技术对应的书籍与书评，以及日常使用的工具、网页    
+**推荐书籍汇总**地址：https://github.com/ruyuejun/polaris  
+
+**OverNote系列分门别类**：  
 - [Server](https://github.com/overnote/server)：包含常用服务端技术：Nginx、mysql、redis、mongodb、linux系统等
 - [数据结构与算法](https://github.com/overnote/algorithm)：数据结构与算法笔记，主讲Go、C版本，另附JS，Java版本
 - [Go](https://github.com/overnote/golang)：详尽的Go领域笔记，包括语法、并发编程、web编程、微服务等
