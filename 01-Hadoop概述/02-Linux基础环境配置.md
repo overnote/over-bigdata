@@ -153,19 +153,19 @@ crontab  -e
 */1 * * * * /usr/sbin/ntpdate 192.168.111.100
 ```
 
-#### 2.4 安装jdk8
+#### 2.4 安装jdk7
 
 ```
 # 卸载原有JAVA
 rpm -e java-1.6.0-openjdk-1.6.0.41-1.13.13.1.el6_8.x86_64    tzdata-java-2016j-1.el6.noarch java-1.7.0-openjdk-1.7.0.131-2.6.9.0.el6_8.x86_64 --nodeps
 
-# 安装jdk8
+# 安装jdk7
 mkdir -p /usr/local/java
-tar -zxvf jdk-8u11-linux-x64.tar.gz -C /usr/local/java
+tar -zxvf jdk-7u75-linux-x64.tar.gz -C /usr/local/
 
 # 配置环境
 vim /etc/profile
-export JAVA_HOME=/usr/local/java/jdk1.8.0_11
+export JAVA_HOME=/usr/local/jdk1.7.0_75
 export PATH=:$JAVA_HOME/bin:$PATH
 
 # 环境生效

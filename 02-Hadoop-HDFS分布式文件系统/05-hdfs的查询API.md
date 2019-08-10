@@ -1,0 +1,237 @@
+## 一 maven工程的贴士
+
+由于cdh版本的所有的软件涉及版权的问题，所以并没有将所有的jar包托管到maven仓库当中去，而是托管在了CDH自己的服务器上面，所以我们默认去maven的仓库下载不到，需要自己手动的添加repository去CDH仓库进行下载。  
+
+```xml
+<repositories>
+    <repository>
+        <id>cloudera</id>
+        <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+    </repository>
+</repositories>
+<dependencies>
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-client</artifactId>
+        <version>2.6.0-mr1-cdh5.14.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-common</artifactId>
+        <version>2.6.0-cdh5.14.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-hdfs</artifactId>
+        <version>2.6.0-cdh5.14.0</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-mapreduce-client-core</artifactId>
+        <version>2.6.0-cdh5.14.0</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/junit/junit -->
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.11</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.testng</groupId>
+        <artifactId>testng</artifactId>
+        <version>RELEASE</version>
+    </dependency>
+</dependencies>
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.0</version>
+            <configuration>
+                <source>1.8</source>
+                <target>1.8</target>
+                <encoding>UTF-8</encoding>
+                <!--    <verbal>true</verbal>-->
+            </configuration>
+        </plugin>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>2.4.3</version>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <minimizeJar>true</minimizeJar>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+      <!--  <plugin>
+            <artifactId>maven-assembly-plugin </artifactId>
+            <configuration>
+                <descriptorRefs>
+                    <descriptorRef>jar-with-dependencies</descriptorRef>
+                </descriptorRefs>
+                <archive>
+                    <manifest>
+                        <mainClass>cn.itcast.hadoop.db.DBToHdfs2</mainClass>
+                    </manifest>
+                </archive>
+            </configuration>
+            <executions>
+                <execution>
+                    <id>make-assembly</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>-->
+    </plugins>
+</build>
+```
+
+## 二 数据的访问
+
+数据的访问有两种方式：
+- 使用url方式
+- 使用文件系统方式访问数据（推荐）
+
+#### 2.1 url方式访问数据
+
+```java
+@Test
+public void demo1()throws  Exception{
+    //第一步：注册hdfs 的url，让java代码能够识别hdfs的url形式
+    URL.setURLStreamHandlerFactory(new FsUrlStreamHandlerFactory());
+
+    InputStream inputStream = null;
+    FileOutputStream outputStream =null;
+    //定义文件访问的url地址
+    String url = "hdfs://192.168.52.100:8020/test/input/install.log";
+    //打开文件输入流
+    try {
+        inputStream = new URL(url).openStream();
+        outputStream = new FileOutputStream(new File("c:\\hello.txt"));
+        IOUtils.copy(inputStream, outputStream);
+    } catch (IOException e) {
+        e.printStackTrace();
+    }finally {
+        IOUtils.closeQuietly(inputStream);
+        IOUtils.closeQuietly(outputStream);
+    }
+}
+```
+
+#### 2.2 使用文件系统方式访问数据（推荐）
+
+在 java 中操作 HDFS，主要涉及以下 Class： 
+- Configuration：该类的对象封转了客户端或者服务器的配置
+- FileSystem：该类的对象是一个文件系统对象，可以用该对象的一些方法来对文件进行操作，通过 FileSystem 的静态方法 get 获得该对象  
+
+```java
+FileSystem fs = FileSystem.get(conf)
+```
+
+get 方法从 conf 中的一个参数 fs.defaultFS 的配置值判断具体是什么类型的文件系统。如果我们的代码中没有指定 fs.defaultFS，并且工程 classpath下也没有给定相应的配置，conf中的默认值就来自于hadoop的jar包中的core-default.xml ， 默 认 值 为 ： file:/// ， 则 获 取 的 将 不 是 一 个DistributedFileSystem 的实例，而是一个本地文件系统的客户端对象。  
+
+## 三 获取 FileSystem的多种方式
+
+方式一：
+```java
+@Test
+public void getFileSystem() throws URISyntaxException, IOException {
+   Configuration configuration = new Configuration();
+    FileSystem fileSystem = FileSystem.get(new URI("hdfs://192.168.52.100:8020"), configuration);
+    System.out.println(fileSystem.toString());
+}
+```
+
+方式二：
+```java
+@Test
+public void getFileSystem2() throws URISyntaxException, IOException {
+    Configuration configuration = new Configuration();
+    configuration.set("fs.defaultFS","hdfs://192.168.52.100:8020");
+    FileSystem fileSystem = FileSystem.get(new URI("/"), configuration);
+    System.out.println(fileSystem.toString());
+}
+```
+
+方式三：
+```java
+@Test
+public void getFileSystem3() throws URISyntaxException, IOException {
+    Configuration configuration = new Configuration();
+    FileSystem fileSystem = FileSystem.newInstance(new URI("hdfs://192.168.52.100:8020"), configuration);
+    System.out.println(fileSystem.toString());
+}
+```
+
+方式四：
+```java
+@Test
+public void getFileSystem4() throws  Exception{
+    Configuration configuration = new Configuration();
+    configuration.set("fs.defaultFS","hdfs://192.168.52.100:8020");
+    FileSystem fileSystem = FileSystem.newInstance(configuration);
+    System.out.println(fileSystem.toString());
+}
+```
+
+## 四 递归遍历文件系统当中的所有文件
+
+递归遍历hdfs文件系统:
+```java
+@Test
+public void listFile() throws Exception{
+    FileSystem fileSystem = FileSystem.get(new URI("hdfs://192.168.52.100:8020"), new Configuration());
+    FileStatus[] fileStatuses = fileSystem.listStatus(new Path("/"));
+    for (FileStatus fileStatus : fileStatuses) {
+        if(fileStatus.isDirectory()){
+            Path path = fileStatus.getPath();
+            listAllFiles(fileSystem,path);
+        }else{
+            System.out.println("文件路径为"+fileStatus.getPath().toString());
+
+        }
+    }
+}
+public void listAllFiles(FileSystem fileSystem,Path path) throws  Exception{
+    FileStatus[] fileStatuses = fileSystem.listStatus(path);
+    for (FileStatus fileStatus : fileStatuses) {
+        if(fileStatus.isDirectory()){
+            listAllFiles(fileSystem,fileStatus.getPath());
+        }else{
+            Path path1 = fileStatus.getPath();
+            System.out.println("文件路径为"+path1);
+        }
+    }
+}
+```
+
+官方提供的直接遍历API：
+```java
+@Test
+public void listMyFiles()throws Exception{
+    //获取fileSystem类
+    FileSystem fileSystem = FileSystem.get(new URI("hdfs://192.168.52.100:8020"), new Configuration());
+    //获取RemoteIterator 得到所有的文件或者文件夹，第一个参数指定遍历的路径，第二个参数表示是否要递归遍历
+    RemoteIterator<LocatedFileStatus> locatedFileStatusRemoteIterator = fileSystem.listFiles(new Path("/"), true);
+    while (locatedFileStatusRemoteIterator.hasNext()){
+        LocatedFileStatus next = locatedFileStatusRemoteIterator.next();
+        System.out.println(next.getPath().toString());
+    }
+    fileSystem.close();
+}
+```
+

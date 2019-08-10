@@ -14,32 +14,17 @@ MapReduce       JobHistoryServer
 
 ## 一 第一步：安装hadoop
 
-编译 CDH版hadoop
+这里直接上传编译好的hadoop文件即可，解压到`/usr/loca`下即可，测试：
 ```
-# 下载地址 http://archive.cloudera.com/cdh5/cdh/5/hadoop-2.6.0-cdh5.14.0-src.tar.gz
-tar -zxvf hadoop-2.6.0-cdh5.14.0-src.tar.gz -C /usr/local
-cd  /usr/local/hadoop-2.6.0-cdh5.14.0
-
-# 编译不支持snappy压缩：
-mvn package -Pdist,native -DskipTests –Dtar   
-
-# 编译支持snappy压缩：
-mvn package -DskipTests -Pdist,native -Dtar -Drequire.snappy -e -X
-
-# 查看hadoop支持的压缩方式以及本地库
-bin/hadoop checknative  
-```
-
-注意，如果出现错误`An Ant BuildException has occured: exec returned: 2`,是因为tomcat的压缩包没有下载完成，需要自己下载一个对应版本的apache-tomcat-6.0.53.tar.gz的压缩包放到指定路径下面去即可,这两个路径下面需要放上这个tomcat的压缩包:
-```
-/usr/local/hadoop-2.6.0-cdh5.14.0/hadoop-hdfs-project/hadoop-hdfs-httpfs/downloads
-/usr/local/hadoop-2.6.0-cdh5.14.0/hadoop-common-project/hadoop-kms/downloads
+# 三台机器都要安装依赖  yum install openssl-devel
+cd /usr/local/hadoop****
+./bin/hadoop checknative				# 输出结构为true则完成
 ```
 
 
 ## 二 第二步：修改配置文件
 
-#### 2.1 第一台机器修改/etc/core-site.xml
+#### 2.1 第一台机器修改etc/hadoop/core-site.xml
 
 ```xml
 <configuration>
@@ -125,14 +110,16 @@ bin/hadoop checknative
 </configuration>
 ```
 
-#### 2.3 修改第一台机器 etc/hadoophadoop-env.sh
+#### 2.3 修改第一台机器 etc/hadoop/hadoop-env.sh
+
+注意jdk版本
 ```
 vim hadoop-env.sh
-export JAVA_HOME=/usr/local/jdk1.8.0_141
+export JAVA_HOME=/usr/local/jdk1.7.0_80
 ```
 
 #### 2.4 修改第一台机器 etc/hadoop/mapred-site.xml
-如果没有该文件，可以修改 mapred-site.xml
+如果没有该文件，可以修改 mapred-site.xml.template
 ```xml
 <configuration>
 	<property>
@@ -217,8 +204,9 @@ scp -r hadoop-2.6.0-cdh5.14.0/ node03:$PWD
 所有机器都执行：
 ```
 vim  /etc/profile
-export HADOOP_HOME=/export/servers/hadoop-2.6.0-cdh5.14.0
+export HADOOP_HOME=/usr/local/hadoop-2.6.0-cdh5.14.0
 export PATH=:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$PATH
+
 source /etc/profile
 ```
 
@@ -226,10 +214,12 @@ source /etc/profile
 
 要启动 Hadoop 集群，需要启动 HDFS 和 YARN 两个集群。  
 
-注意：首次启动HDFS时，必须对其进行格式化操作。本质上是一些清理和准备工作，因为此时的 HDFS 在物理上还是不存在的。  
+注意：
+- 首次启动HDFS时，必须对node01进行格式化操作,本质上是一些清理和准备工作，因为此时的 HDFS 在物理上还是不存在的。  
+- 该操作执行一次即可，因为在生产环境中不可能要格式化操作
 
 ```
-bin/hdfs namenode  -format或者bin/hadoop namenode –format
+bin/hdfs namenode  -format	# 或 bin/hadoop namenode –format
 ```
 
 #### 5.3 启动方式一：单节点逐一启动
@@ -272,16 +262,11 @@ sbin/mr-jobhistory-daemon.sh start historyserver
 ```
 sbin/stop-dfs.sh
 sbin/stop-yarn.sh
-sbin/mr-jobhistory-daemon.sh start historyserver
+sbin/mr-jobhistory-daemon.sh stop historyserver
 ```
 
 #### 5.5 浏览器查看启动页面
 
-hdfs初体验：从Linux 本地上传一个文本文件到 hdfs 的/test/input 目录下
-```
-hadoop fs -mkdir -p /test/input 
-hadoop fs -put /root/install.log  /test/input 
-```
 
 hdfs集群访问地址：http://192.168.120.111:50070/dfshealth.html#tab-overview  
 
