@@ -1,6 +1,11 @@
 ## 大数据相关资料
 
-===TODO====
+- [《Hadoop权威指南:大数据的存储与分析(第4版)(修订版)(升级版)》](https://book.douban.com/subject/27115351/)
+- [《Hadoop技术内幕-深入解析Hadoop Common和HDFS架构设计与实现原理》](https://book.douban.com/subject/24294210/)
+- [《Hadoop技术内幕-深入解析YARN架构设计与实现原理》](https://book.douban.com/subject/25774649/)
+- [《Hadoop技术内幕-深入解析MapReduce架构设计与实现原理》](https://book.douban.com/subject/24375031/)
+- [《Hadoop 2.X HDFS源码剖析》](https://book.douban.com/subject/26755716/)
+
 
 ## 附录：笔记汇总
 
