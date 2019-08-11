@@ -32,7 +32,7 @@ NameNode全权管理数据库的复制，它周期性的从集群中的每个Dat
 ```
    <property>
         <name>dfs.block.size</name>
-        <value>块大小 以字节为单位</value>//只写数值就可以
+        <value>块大小以字节为单位</value>//只写数值就可以
     </property>
 ```
 
@@ -58,13 +58,14 @@ hdfs的文件权限机制与linux系统的文件权限机制类似：
 - w:write  
 - x:execute  权限x对于文件表示忽略，对于文件夹表示是否有权限访问其内容
 
-#### 2.4 元素据FSimage以及edits和secondaryNN
+#### 2.4 元素据FSimage以及edits和secondaryNameNode
 
-当NameNode就一个的时候，所有的元数据信息都保存在了FsImage与Eidts文件当中，这两个文件就记录了所有的数据的元数据信息，元数据信息的保存目录配置在了hdfs-site.xml当中。  
+当NameNode就一个的时候，所有的元数据信息都保存在FsImage与Eidts文件当中，配置位于hdfs-site.xml当中：
+- fsimage:存放了namenode中完整的元数据的镜像，一般称为检查点。
+- edits：记录一段时间内的元数据信息变化，例如增删改了哪些文件，文件内容较。
+- secondarynameNode：edits在操作时间过长后，也会无限变大，secondarynameNode用于合并fsimage和edits，清空edits。
 
 客户端对hdfs进行写文件时会首先被记录在edits文件中，edits修改时元数据也会更新。每次hdfs更新时edits先更新后客户端才会看到最新信息。  
-
-fsimage:是namenode中关于元数据的镜像，一般称为检查点。  
 
 一般开始时对namenode的操作都放在edits中，为什么不放在fsimage中呢？  
 
@@ -108,3 +109,7 @@ secondarynamenode在合并edits和fsimage时需要消耗的内存和namenode差�
 - fs.checkpoint.period: 默认是一个小时（3600s)
 - fs.checkpoint.size:  edits达到一定大小时也会触发合并（默认64MB)
 
+
+问题：edits什么时候跟fsimage合并？？？   
+
+控制策略：时间长短  +  文件大小 比如说我们可以定义两个小时，或者edits文件大小达到1GB的时候合并一次

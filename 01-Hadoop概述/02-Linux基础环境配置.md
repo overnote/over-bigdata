@@ -171,3 +171,5 @@ export PATH=:$JAVA_HOME/bin:$PATH
 # 环境生效
 source /etc/profile
 ```
+
+关机注意事项：由于hadoop每次都要重新启动，虚拟机的关机最好使用挂起方式，下次开机只用重启恢复即可。

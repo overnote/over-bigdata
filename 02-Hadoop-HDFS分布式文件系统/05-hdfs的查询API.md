@@ -1,6 +1,6 @@
 ## 一 maven工程的贴士
 
-由于cdh版本的所有的软件涉及版权的问题，所以并没有将所有的jar包托管到maven仓库当中去，而是托管在了CDH自己的服务器上面，所以我们默认去maven的仓库下载不到，需要自己手动的添加repository去CDH仓库进行下载。  
+由于cdh版本的所有的软件涉及版权的问题，所以并没有将所有的jar包托管到maven仓库当中去，而是托管在了CDH自己的服务器上面，需要自己手动的添加repository去CDH仓库进行下载。  
 
 ```xml
 <repositories>
@@ -74,31 +74,18 @@
                 </execution>
             </executions>
         </plugin>
-      <!--  <plugin>
-            <artifactId>maven-assembly-plugin </artifactId>
-            <configuration>
-                <descriptorRefs>
-                    <descriptorRef>jar-with-dependencies</descriptorRef>
-                </descriptorRefs>
-                <archive>
-                    <manifest>
-                        <mainClass>cn.itcast.hadoop.db.DBToHdfs2</mainClass>
-                    </manifest>
-                </archive>
-            </configuration>
-            <executions>
-                <execution>
-                    <id>make-assembly</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>single</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>-->
     </plugins>
 </build>
 ```
+
+maven仓库也可能出现无法下载的问题，可以解压已下载的过maven仓库到本地，然后在IDEA上选择-settings-Build-Maven-Repositories-点击右侧的Update   
+
+
+
+
+cdh版本jar包下载地址：
+- https://www.cloudera.com/documentation/enterprise/release-notes/topics/cdh_vd_cdh5_maven_repo.html
+- https://www.cloudera.com/documentation/enterprise/release-notes/topics/cdh_vd_cdh5_maven_repo_514x.html
 
 ## 二 数据的访问
 
@@ -108,6 +95,7 @@
 
 #### 2.1 url方式访问数据
 
+使用标准的流接口操作hdfs：
 ```java
 @Test
 public void demo1()throws  Exception{
@@ -117,7 +105,7 @@ public void demo1()throws  Exception{
     InputStream inputStream = null;
     FileOutputStream outputStream =null;
     //定义文件访问的url地址
-    String url = "hdfs://192.168.52.100:8020/test/input/install.log";
+    String url = "hdfs://192.168.120.111:8020/test/input/install.log";
     //打开文件输入流
     try {
         inputStream = new URL(url).openStream();
@@ -132,9 +120,15 @@ public void demo1()throws  Exception{
 }
 ```
 
+如果报winutils异常，这是因为windows作为了客户端操作了linux上的hadoop，解决方案：
+- 把hadoop-2.6.0-cdh5.14.0这个安装包拷贝到一个没有中文没有空格的路径下面去
+- 在windows上面配置hadoop的环境变量，增加变量HADOOP_HOME，值是下载的zip包解压的目录，然后在系统变量path里增加HADOOP_HOME\bin 即可。
+- 把hadoop-2.6.0-cdh5.14.0中的lib中的hadoop.dll文件放到系统盘里面去  C:\Windows\System32
+- 关闭windows重启
+
 #### 2.2 使用文件系统方式访问数据（推荐）
 
-在 java 中操作 HDFS，主要涉及以下 Class： 
+使用Hadoop官方提供的API，主要涉及以下 Class： 
 - Configuration：该类的对象封转了客户端或者服务器的配置
 - FileSystem：该类的对象是一个文件系统对象，可以用该对象的一些方法来对文件进行操作，通过 FileSystem 的静态方法 get 获得该对象  
 
@@ -144,14 +138,13 @@ FileSystem fs = FileSystem.get(conf)
 
 get 方法从 conf 中的一个参数 fs.defaultFS 的配置值判断具体是什么类型的文件系统。如果我们的代码中没有指定 fs.defaultFS，并且工程 classpath下也没有给定相应的配置，conf中的默认值就来自于hadoop的jar包中的core-default.xml ， 默 认 值 为 ： file:/// ， 则 获 取 的 将 不 是 一 个DistributedFileSystem 的实例，而是一个本地文件系统的客户端对象。  
 
-## 三 获取 FileSystem的多种方式
-
 方式一：
 ```java
 @Test
-public void getFileSystem() throws URISyntaxException, IOException {
-   Configuration configuration = new Configuration();
-    FileSystem fileSystem = FileSystem.get(new URI("hdfs://192.168.52.100:8020"), configuration);
+public void getFileSystem1() throws URISyntaxException, IOException {
+    Configuration configuration = new Configuration();      // 刚new出来时还是本地文件系统
+    // 使用两个参数获取分布式文件系统
+    FileSystem fileSystem = FileSystem.get(new URI("hdfs://192.168.120.111:8020"), configuration);
     System.out.println(fileSystem.toString());
 }
 ```
@@ -161,7 +154,8 @@ public void getFileSystem() throws URISyntaxException, IOException {
 @Test
 public void getFileSystem2() throws URISyntaxException, IOException {
     Configuration configuration = new Configuration();
-    configuration.set("fs.defaultFS","hdfs://192.168.52.100:8020");
+    // 覆盖原始配置，设置为分布式文件系统
+    configuration.set("fs.defaultFS","hdfs://192.168.120.111:8020");       
     FileSystem fileSystem = FileSystem.get(new URI("/"), configuration);
     System.out.println(fileSystem.toString());
 }
@@ -172,7 +166,7 @@ public void getFileSystem2() throws URISyntaxException, IOException {
 @Test
 public void getFileSystem3() throws URISyntaxException, IOException {
     Configuration configuration = new Configuration();
-    FileSystem fileSystem = FileSystem.newInstance(new URI("hdfs://192.168.52.100:8020"), configuration);
+    FileSystem fileSystem = FileSystem.newInstance(new URI("hdfs://192.168.120.111:8020"), configuration);
     System.out.println(fileSystem.toString());
 }
 ```
@@ -182,19 +176,19 @@ public void getFileSystem3() throws URISyntaxException, IOException {
 @Test
 public void getFileSystem4() throws  Exception{
     Configuration configuration = new Configuration();
-    configuration.set("fs.defaultFS","hdfs://192.168.52.100:8020");
+    configuration.set("fs.defaultFS","hdfs://192.168.120.111:8020");
     FileSystem fileSystem = FileSystem.newInstance(configuration);
     System.out.println(fileSystem.toString());
 }
 ```
 
-## 四 递归遍历文件系统当中的所有文件
+## 三 递归遍历文件系统当中的所有文件
 
 递归遍历hdfs文件系统:
 ```java
 @Test
 public void listFile() throws Exception{
-    FileSystem fileSystem = FileSystem.get(new URI("hdfs://192.168.52.100:8020"), new Configuration());
+    FileSystem fileSystem = FileSystem.get(new URI("hdfs://192.168.120.111:8020"), new Configuration());
     FileStatus[] fileStatuses = fileSystem.listStatus(new Path("/"));
     for (FileStatus fileStatus : fileStatuses) {
         if(fileStatus.isDirectory()){
@@ -224,7 +218,7 @@ public void listAllFiles(FileSystem fileSystem,Path path) throws  Exception{
 @Test
 public void listMyFiles()throws Exception{
     //获取fileSystem类
-    FileSystem fileSystem = FileSystem.get(new URI("hdfs://192.168.52.100:8020"), new Configuration());
+    FileSystem fileSystem = FileSystem.get(new URI("hdfs://192.168.120.111:8020"), new Configuration());
     //获取RemoteIterator 得到所有的文件或者文件夹，第一个参数指定遍历的路径，第二个参数表示是否要递归遍历
     RemoteIterator<LocatedFileStatus> locatedFileStatusRemoteIterator = fileSystem.listFiles(new Path("/"), true);
     while (locatedFileStatusRemoteIterator.hasNext()){

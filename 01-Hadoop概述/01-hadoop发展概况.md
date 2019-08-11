@@ -12,6 +12,22 @@ Nutch的开发人员完成了相应的开源实现HDFS和MAPREDUCE，并从Nutch
 
 ![](../images/bigdata/hadoop-00.png)  
 
+大数据的核心技术体系：
+- 大数据离线数据处理
+  - Hadoop大数据平台：HDFS分布式文件系统，MapReduce分布式计算框架，Yarn资源管理平台
+  - Hive数据仓库（底层是MR）
+  - Sqoop关系行数据库和非关系型数据的导入导出（底层是MR）
+  - Flume数据采集
+- 大数据实时数据处理
+  - Storm：如实时统计天猫双11销售额
+  - Spark：一站式数据分析平台，基于Spark-Core，包含：SparkSql(类似Hive)，SparkStreaming（类似Storm），SparkMllib（机器学习），SparkGraphX（图计算）
+  - 消息队列： Kafka
+- 大数据新兴技术
+  - Flink：一站式数据分析
+  - Keylin数据分析：数据立方体
+
+
+
 ## 二 认识Hadoop原理
 
 Hadoop是一个分布式基础架构系统，其核心设计师HDFS和MapReduce，该系统类似于集群操作系统，可以用廉价的通用硬件形成资源池从而组成为例强大的分布式集群系统，用户可以在不了解分布式底层细节的情况下开发分布式程序。其开发思想来自于谷歌的采集系统。  
