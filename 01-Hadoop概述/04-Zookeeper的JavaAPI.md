@@ -64,7 +64,7 @@ process 方法是 Watcher 接口中的一个回调方法，当 ZooKeeper 向客�
 	public void createNode() throws Exception {
 		RetryPolicy retryPolicy = new  ExponentialBackoffRetry(1000, 1);
         //获取客户端对象
-		CuratorFramework client = CuratorFrameworkFactory.newClient("192.168.120.111:2181,192.168.112.110:2181,192.168.120.113:2181", 1000, 1000, retryPolicy);
+		CuratorFramework client = CuratorFrameworkFactory.newClient("192.168.186.131:2181,192.168.186.132:2181,192.168.186.133:2181", 1000, 1000, retryPolicy);
         //调用start开启客户端操作
 		client.start();
 	    //通过create来进行创建节点，并且需要指定节点类型

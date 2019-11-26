@@ -63,9 +63,9 @@ peerType=observer
 server.1:localhost:2181:3181:observer
 
 服务器IP	    主机名	myid的值
-192.168.120.111	node01	1
-192.168.120.112	node02	2
-192.168.120.113	node03	3
+192.168.186.131	node01	1
+192.168.186.132	node02	2
+192.168.186.133	node03	3
 ```
 
 #### 2.1 ZooKeeper集群安装

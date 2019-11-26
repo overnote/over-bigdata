@@ -1,10 +1,10 @@
 ## 一 基础命令
 
 - ls：查看目录下文件列表
-  - hdfs dfs -ls /test/file1
+  - hdfs dfs -ls /dirs/dir1
   - hdfs dfs -ls -R             # 旧版写作 -lsr
 - mkdir：创建文件夹，支持递归参数 -p
-  - hdfs dfs -mkdir -p /test/f1/f11
+  - hdfs dfs -mkdir -p /dirs/dir1
 - moveFromLocal：从本地磁盘移动到hdfs磁盘
   - hdfs dfs -moveFromeLocal /root/test.log /
 - moveToLocal：该命令未实现

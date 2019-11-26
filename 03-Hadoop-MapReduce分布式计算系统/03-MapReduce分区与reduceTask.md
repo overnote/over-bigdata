@@ -72,8 +72,8 @@ public class PartitionMain  extends Configured implements Tool {
         job.setJarByClass(PartitionMain.class);
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
-        TextInputFormat.addInputPath(job,new Path("hdfs://192.168.120.111:8020/partitioner"));
-        TextOutputFormat.setOutputPath(job,new Path("hdfs://192.168.120.111:8020/outpartition"));
+        TextInputFormat.addInputPath(job,new Path("hdfs://192.168.186.131:8020/partitioner"));
+        TextOutputFormat.setOutputPath(job,new Path("hdfs://192.168.186.131:8020/outpartition"));
         job.setMapperClass(MyMapper.class);
         job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(NullWritable.class);

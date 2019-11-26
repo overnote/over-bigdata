@@ -1,15 +1,9 @@
 ## 一 HDFS介绍
 
-HDFS 是 Hadoop Distribute File System 的简称，即 Hadoop 分布式文件系统，是 Hadoop 核心组件之一，作为最底层的分布式存储服务而存在。 
-
-分布式文件系统解决的问题就是大数据存储。它们是横跨在多台计算机上的存储系统。  
+HDFS 是 Hadoop Distribute File System 的简称，即 Hadoop 分布式文件系统，是 Hadoop 核心组件之一，作为最底层的分布式存储服务而存在。分布式文件系统解决的问题就是大数据存储，即横跨在多台计算机上的存储系统。  
 
 hdfs文件系统思想图示：
 ![](../images/bigdata/hdfs-01.png)  
-
-hdfs的特点：
-- 首先，它是一个文件系统，用于存储文件，通过统一的命名空间目录树来定位文件； 
-- 其次，它是分布式的，由很多服务器联合起来实现其功能，集群中的服务器有各自的角色。
 
 简单理解hdfs：每台机器出一块磁盘，凑成一个大的硬盘，大的硬盘的容量来自各个服务器的硬盘容量之和。  
 
@@ -17,13 +11,15 @@ hdfs的特点：
 
 ```
 # 递归创建一个目录，打开hdfs集群地址后，位于 菜单 Utilities/Browse下可以查阅
-hdfs dfs -mkdir -p /test/input	# 旧版命令为：hadoop fs  -mkdir -p /test/input
+hdfs dfs -mkdir -p /dirs/dir1	
 
 # 在本地磁盘上创建一个文件，并上传到分布式文件系统上
-cd ~
-touche logs.log
-hdfs dfs -put logs.log  /test/input 
+cd /root
+touche temp.txt
+hdfs dfs -put temp.txt  /dirs/dir1 
 ```
+
+贴士：旧版hadoop这里的命令式 `hadoop fs `
 
 ## 三 HDFS特点
 
