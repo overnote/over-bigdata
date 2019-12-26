@@ -1,7 +1,9 @@
 ## 附 编译hadoop步骤
 
-准备步骤（如果你认为你的网络与计算机性能凑合，那么可以忽略下面的编译步骤）：
+由于源码包缺少编译文件，需要准备一台很好的Linux机器，编译步骤如下所示。当然，网上也有大量已经编译完成的版本可供下载。  
 ```
+# 前提：机器必须关闭selinux，防火墙，安装jdk7（只有jdk7才能编译）
+
 # 步骤一：安装依赖
 yum update -y
 yum install -y autoconf automake libtool cmake lzo-devel zlib-devel gcc gcc-c++ ncurses-devel openssl-devel bzip2-devel

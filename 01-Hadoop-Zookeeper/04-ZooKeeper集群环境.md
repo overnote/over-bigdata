@@ -1,12 +1,12 @@
 ## 一 ZooKeeper简介
 
-#### 1.1 ZooKeeper是什么
+### 1.1 ZooKeeper是什么
 
 Zookeeper 是一个分布式协调服务的开源框架。主要用来解决分布式集群中应用系统的一致性问题，例如怎样避免同时操作同一数据造成脏读的问题。  
 
 ZooKeeper 本质上是一个分布式的小文件存储系统，提供基于类似于文件系统的目录树方式的数据存储，并且可以对树中的节点进行有效管理。从而用来维护和监控你存储的数据的状态变化。通过监控这些数据状态的变化，从而可以达到基于数据的集群管理。 诸如： 统一命名服务(dubbo)、分布式配置管理(solr的配置集中管理)、分布式消息队列（sub/pub）、分布式锁、分布式协调等功能。  
 
-#### 1.2 ZooKepper架构
+### 1.2 ZooKepper架构
 
 ![](../images/bigdata/zookeeper-1.png)  
 
@@ -16,7 +16,6 @@ Leader:
 - 集群内部各个服务器的调度者
 
 对于 create， setData， delete 等有写操作的请求，则需要统一转发给leader 处理,leader 需要决定编号、执行操作，这个过程称为一个事务。
-
 
 Follower:
 - 处理客户端非事务（读操作） 请求，
@@ -30,7 +29,7 @@ Observer:
 - 处理能力的前提下提升集群的非事务处理能力。
 - 其实就是增加并发的读请求
 
-#### 1.3 ZooKeeper的特性
+### 1.3 ZooKeeper的特性
 
 - 全局数据一致：重要特征。每个server保存一份相同的数据副本，client无论连接到哪个server，展示的数据都是一致的
 - 可靠性：如果消息被其中一台服务器接受，那么将被所有的服务器接受。
@@ -40,7 +39,7 @@ Observer:
 
 ## 二 ZooKeeper集群环境
 
-#### 2.0 集群环境安装的大致过程
+在03节中已经记录了zookeeper安装过程，所以不再提供。  
 
 Zookeeper 集群搭建指的是 ZooKeeper 分布式模式安装。 通常由 2n+1台 servers 组成。   
 
@@ -51,65 +50,21 @@ Zookeeper 集群搭建指的是 ZooKeeper 分布式模式安装。 通常由 2n+
 - 设置 myid
 - 启动 ZooKeeper 集群
 
-如果要想使用 Observer 模式，可在对应节点的配置文件添加如下配置：
+如果要想使用 Observer 模式：
 ```
+# 可在对应节点的配置文件添加如下配置：
 peerType=observer
-```
 
-其次，必须在配置文件指定哪些节点被指定为 Observer，如：
-```
+# 其次，必须在配置文件指定哪些节点被指定为 Observer，如：
 server.1:localhost:2181:3181:observer
 
 服务器IP	    主机名	myid的值
-192.168.186.131	node01	1
-192.168.186.132	node02	2
-192.168.186.133	node03	3
+192.168.120.131	node01	1
+192.168.120.132	node02	2
+192.168.120.133	node03	3
 ```
 
-#### 2.1 ZooKeeper集群安装
 
-软件下载地址：http://archive.apache.org/dist/zookeeper/  
 
-推荐版本：3.4.9，安装地址为：/usr/local/zookeeper/zookeeper-3.4.9
 
-```
-# 我们可以只安装node01，安装完毕后分发到node02，node03
-mkdir -p /usr/local/zookeeper/
-mkdir -p /usr/local/zookeeper/zkdatas/
-tar -zxvf zookeeper-3.4.9.tar.gz -C /usr/local/zookeeper/
-cd /usr/local/zookeeper/zookeeper-3.4.9/conf/
-cp zoo_sample.cfg zoo.cfg
 
-vim  zoo.cfg
-
-# 修改数据文件存放地址
-dataDir=/usr/local/zookeeper/zkdatas/
-# 打开下列配置
-autopurge.snapRetainCount=3
-autopurge.purgeInterval=1
-# 添加下列配置
-server.1=node01:2888:3888
-server.2=node02:2888:3888
-server.3=node03:2888:3888
-
-# 添加myid配置
-vim /usr/local/zookeeper/zkdatas/myid   # 写入1即可
-
-```
-
-配置完毕后，将软件发送给node02，node03
-```
-cd /usr/local/
-scp -r zookeeper/ node02:$PWD
-scp -r zookeeper/ node03:$PWD
-
-# 发送完毕后不要忘了分别修改node02和node03的myid配置为2，3，并清空该文件夹下其他文本
-```
-
-启动并测试软件：
-```
-cd /usr/local/zookeeper/zookeeper-3.4.9/bin/
-zkServer.sh start           # 启动
-jps                         # 查看启动进程
-zkServer.sh status          # 查看集群状态，未安装三台集群时，不要使用该命令
-```
